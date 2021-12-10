@@ -55,6 +55,32 @@ namespace DesafioUfnAtos2.Entities
             }
         }
 
+        public bool ExisteRemedio(Remedio remedio)
+        {
+            Contexto bd = new();
 
+            try
+            {
+                SqlConnection cn = bd.AbrirConexao();
+                SqlCommand command = new($"select * from Remedios where Horario = '{remedio.Horario}' and Nome = '{remedio.Nome}'", cn);
+
+                SqlDataReader rdr = command.ExecuteReader();
+
+                if (rdr.Read())
+                    return true;
+
+                else
+                    return false;
+
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            finally
+            {
+                bd.FecharConexao();
+            }
+        }
     }
 }

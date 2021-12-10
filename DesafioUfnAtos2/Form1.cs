@@ -1,4 +1,5 @@
 using DesafioUfnAtos2.Banco;
+using DesafioUfnAtos2.Entities;
 using DesafioUfnAtos2.Helpers;
 using System.Data;
 
@@ -30,14 +31,25 @@ namespace DesafioUfnAtos2
                 string sql = $"select Nome from remedios where Horario = '{agora}'";
                 dt = banco.ExecutarConsultaGenerica(sql);
 
-                if (dt.Rows.Count != 0)
+                // Este if está tratando para não dar erro com o teste - o tick pode acionar enquanto estiver escrevendo o horario
+                if (dt != null)
                 {
-                    foreach (DataRow row in dt.Rows)
+                    if (dt.Rows.Count != 0)
                     {
-                        foreach (DataColumn colum in dt.Columns)
+                        string mensagem = null;
+
+                        foreach (DataRow row in dt.Rows)
                         {
-                            MessageBox.Show("é hora de tomar seu " + row[colum].ToString() + ".");
+                            foreach (DataColumn colum in dt.Columns)
+                            {
+                                if (mensagem != null)
+                                    mensagem += " e seu " + row[colum].ToString();
+
+                                else
+                                    mensagem = row[colum].ToString();
+                            }
                         }
+                        MessageBox.Show("é hora de tomar seu " + mensagem + ".");
                     }
                 }
             }
@@ -50,6 +62,53 @@ namespace DesafioUfnAtos2
             DataTable dt = new();
             dt = banco.ExecutarConsultaGenerica(sql);
             dataGridView1.DataSource = dt;
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dataGridView1.Rows[e.RowIndex].Cells[0].Value != null)
+            {
+                try
+                {
+
+                    txtName.Text = dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString();
+                    txtHorario.Text = dataGridView1.Rows[e.RowIndex].Cells[0].Value.ToString();
+                    btnDelete.Enabled = true;
+                    btnCadastro.Enabled = true;
+                    btnDeleteAll.Enabled = true;
+                    btnDeleteAll.Text += dataGridView1.Rows[e.RowIndex].Cells[1].Value.ToString().ToLower();
+                }
+                catch (Exception ex)
+                {
+
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Contexto banco = new();
+            string sql = $"delete from Remedios where Horario = '{txtHorario.Text}' and Nome = '{txtName.Text}'";
+            DataTable dt = new();
+            dt = banco.ExecutarConsultaGenerica(sql);
+            MessageBox.Show("Você acaba de deletar um horario de sua rotina, caso tenha clicado errado, é só importar novamente!");
+            MostrarRemediosCadastrados();
+        }
+
+        private void btnDeleteAll_Click(object sender, EventArgs e)
+        {
+            Contexto banco = new();
+            string sql = $"delete from Remedios where Nome = '{txtName.Text}'";
+            DataTable dt = new();
+            dt = banco.ExecutarConsultaGenerica(sql);
+            MessageBox.Show($"Atenção! Você acabou de tirar de sua rotina o {txtName.Text}. Parabens, ou você está melhor ou acabou o dinheiro e voce esta mais perto da morte!");
+            MostrarRemediosCadastrados();
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+            MessageBox.Show("Atenção! Somente o seu médico pode cadastrar horários. Utilize o importador para cadastrar sua receita!");
         }
     }
 }

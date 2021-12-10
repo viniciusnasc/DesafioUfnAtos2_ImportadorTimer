@@ -45,8 +45,12 @@ namespace DesafioUfnAtos2.Helpers
                     horario = horario.Replace(")", "");
                     horario = horario.Replace(",", "");
                     Remedio rem = new(entidade[0], TimeSpan.Parse(horario));
-                    rem.GravarRemedio();
-                    count++;
+
+                    if (!rem.ExisteRemedio(rem))
+                    {
+                        rem.GravarRemedio();
+                        count++;
+                    }
                 }
             }
 
